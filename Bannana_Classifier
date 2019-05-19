@@ -1,0 +1,99 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from keras.preprocessing.image import ImageDataGenerator, load_img, img_to_array, array_to_img
+from keras.layers import Conv2D, Flatten, MaxPooling2D, Dense
+from keras.models import Sequential
+from PIL import Image
+import glob, os
+
+base_path = 'C://Users/jamil//Desktop//Bannana Calssifier//Bannana_DataSet//training_set'
+img_list = glob.glob(os.path.join(base_path, '*/*.jpg'))
+
+train_datagen = ImageDataGenerator(
+    rescale=1./255,
+    shear_range=0.1,
+    zoom_range=0.1,
+    width_shift_range=0.1,
+    height_shift_range=0.1,
+    horizontal_flip=True,
+    vertical_flip=True,
+    validation_split=0.1
+)
+
+test_datagen = ImageDataGenerator(
+    rescale=1./255,
+    validation_split=0.1
+)
+train_generator = train_datagen.flow_from_directory(
+    base_path,
+    target_size=(300, 300),
+    batch_size=16,
+    class_mode='categorical',
+    subset='training',
+    seed=0
+)
+
+validation_generator = test_datagen.flow_from_directory(
+    base_path,
+    target_size=(300, 300),
+    batch_size=16,
+    class_mode='categorical',
+    subset='validation',
+    seed=0
+)
+
+labels = (train_generator.class_indices)
+labels = dict((v,k) for k,v in labels.items())
+
+print(labels)
+model = Sequential([
+    Conv2D(filters=32, kernel_size=3, padding='same', activation='relu', input_shape=(300, 300, 3)),
+    MaxPooling2D(pool_size=2),
+
+    Conv2D(filters=64, kernel_size=3, padding='same', activation='relu'),
+    MaxPooling2D(pool_size=2),
+    
+    Conv2D(filters=32, kernel_size=3, padding='same', activation='relu'),
+    MaxPooling2D(pool_size=2),
+    
+    Conv2D(filters=32, kernel_size=3, padding='same', activation='relu'),
+    MaxPooling2D(pool_size=2),
+
+    Flatten(),
+
+    Dense(64, activation='relu'),
+
+    Dense(3, activation='softmax')
+])
+model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['acc'])
+
+model.summary()
+model.fit_generator(train_generator, epochs=20, validation_data=validation_generator)
+
+j='C://Users//jamil//OneDrive//Pictures//Camera Roll'
+size_300=(300,300)
+count=0
+while True:
+    for f in os.listdir(j):
+        if f!='desktop.ini':
+            print(f)
+#            fn,fext=os.path.splitext(f)
+ #           print(fn)
+  #          print(fext)
+            if f.endswith('.jpg'):
+                count+=1
+                im = Image.open(j+'//'+f)
+                img=im.resize(size_300,Image.ANTIALIAS)
+                plt.imshow(img)
+                x=np.asarray(img)
+                preds = model.predict(x.reshape(1,300,300,3))
+                preds_squeezed=preds.squeeze()
+                for i in range(len(preds_squeezed)):
+                    if preds_squeezed[i]==float(1):
+                        preds_label=i
+                        break
+                preds_class=labels[preds_label]
+                plt.figure(figsize=(16,16))
+                plt.title(f'the prediction is {preds_class}')
+                plt.imshow(img)
+                os.remove(j+'//'+f)
