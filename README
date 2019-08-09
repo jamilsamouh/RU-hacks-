@@ -1,3 +1,4 @@
+## Description 
 This project was about taking a live picture of a banana and then calssify it to Yellow/Green/Rotten banana using convolutional neural network
 while connecting it to an app so we can predict when the farmer should pick the banana up before getting rotten and in a span of time that
 the banana won't turn to rottern by the time it reaches the consumer.
