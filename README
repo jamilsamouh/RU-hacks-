@@ -1,4 +1,4 @@
-# What Language I used **jojo**
+# What Language I used
 I used Python through Spyder Integrated Development Environment (IDE) using Keras and Tensorflow as backend 
 # Description
 This project was about taking a live picture of a banana and then calssify it to Yellow/Green/Rotten banana using convolutional neural network
